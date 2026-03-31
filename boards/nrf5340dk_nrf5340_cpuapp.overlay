@@ -1,0 +1,9 @@
+/ {
+    aliases {
+        pwm-led0 = &pwm_led0;
+    };
+};
+
+&pwm0 {
+    status = "okay";
+};

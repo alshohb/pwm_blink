@@ -6,7 +6,9 @@
 LOG_MODULE_REGISTER(pwm_blink, LOG_LEVEL_INF);
 
 #define PWM_LED_NODE DT_ALIAS(pwm_led0)
-#define PWM_PERIOD   PWM_SEC(1U)
+#define PWM_PERIOD   PWM_MSEC(20U)
+#define STEP_COUNT   100
+#define STEP_DELAY   10
 
 static const struct pwm_dt_spec pwm_led = PWM_DT_SPEC_GET(PWM_LED_NODE);
 
@@ -17,16 +19,22 @@ int main(void)
         return -1;
     }
 
-    LOG_INF("PWM blink starting...");
+    LOG_INF("PWM breathing effect starting...");
+
+    uint32_t pulse;
 
     while (1) {
-        pwm_set_dt(&pwm_led, PWM_PERIOD, PWM_PERIOD);
-        LOG_INF("LED ON");
-        k_sleep(K_SECONDS(1));
+        for (int i = 0; i <= STEP_COUNT; i++) {
+            pulse = (PWM_PERIOD / STEP_COUNT) * i;
+            pwm_set_dt(&pwm_led, PWM_PERIOD, pulse);
+            k_msleep(STEP_DELAY);
+        }
 
-        pwm_set_dt(&pwm_led, PWM_PERIOD, 0);
-        LOG_INF("LED OFF");
-        k_sleep(K_SECONDS(1));
+        for (int i = STEP_COUNT; i >= 0; i--) {
+            pulse = (PWM_PERIOD / STEP_COUNT) * i;
+            pwm_set_dt(&pwm_led, PWM_PERIOD, pulse);
+            k_msleep(STEP_DELAY);
+        }
     }
 
     return 0;
